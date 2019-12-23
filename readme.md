@@ -12,6 +12,17 @@
 
 如若没有重大变动，本工程基本不会更新，但会持续关注。
 
+### 温馨提示
+
+如果出现`dalvik.system.PathClassLoader`的问题，基本是Android Studio没有将相关Jni打包进APK，使用命令行调试软件
+
+```bash
+# Windows
+gradlew.bat installDebug
+# Linux
+./gradlew installDebug
+```
+
 ## 引用
 
 首先增加私有仓库的引用地址，在项目对应的 build.gradle 文件中增加私有仓库地址。

@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Preview
     private lateinit var wechatScanner: WechatScanner
     private lateinit var camera: Camera
 
-    private var isProcessing: Boolean = false
     private var isScanFinish: Boolean = false
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -72,10 +71,8 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Preview
     }
 
     override fun onPreviewFrame(data: ByteArray, camera: Camera) {
-        if (isScanFinish || isProcessing)
+        if (isScanFinish)
             return
-
-        isProcessing = true
 
         val startTimestamp: Long = System.currentTimeMillis()
         val scanResultList: List<QbarNative.QBarResultJNI> = wechatScanner.onPreviewFrame(
@@ -90,8 +87,6 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Preview
             textView.post { textView.text = scanResultList.first().let { String(it.data, Charset.forName(it.charset)) } }
             logger.info("LOG:MainActivity:onPreviewFrame scan cost: {}ms", System.currentTimeMillis() - startTimestamp)
         }
-
-        isProcessing = false
     }
 
     override fun onAutoFocus(success: Boolean, camera: Camera?) {

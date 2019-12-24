@@ -23,7 +23,25 @@ gradlew.bat installDebug
 ./gradlew installDebug
 ```
 
-## 引用
+### 截图
+
+![](./images/394b952b8c51119b.png)
+
+## 使用
+
+### 总体概述
+
+在适当的位置声明一个[WechatScanner](./library/src/main/java/com/tencent/qbar/WechatScanner.kt)对象，如若不清楚可参照[MainActivity](./app/src/main/java/com/tencent/qbar/sample/MainActivity.kt)中进行编写，本库的总体方法调用顺序如下，请严格按照本顺序进行调用：
+
+1. library.releaseAssert
+2. library.init
+3. library.setReader
+4. library.onPreviewFrame
+5. library.release
+
+> app中没有增加动态申请权限，运行时请到设置手动给予权限。
+
+### 引用
 
 首先增加私有仓库的引用地址，在项目对应的 build.gradle 文件中增加私有仓库地址。
 
@@ -40,19 +58,10 @@ dependencies {
 }
 ```
 
-## 使用
+### 复制so
 
-### 总体概述
+将[so文件]()复制到项目的JniLibs目录下，<font color=red>aar不会复制so文件</font>。
 
-在适当的位置声明一个[WechatScanner](./library/src/main/java/com/tencent/qbar/WechatScanner.kt)对象，如若不清楚可参照[MainActivity](./app/src/main/java/com/tencent/qbar/sample/MainActivity.kt)中进行编写，本库的总体方法调用顺序如下，请严格按照本顺序进行调用：
-
-1. library.releaseAssert
-2. library.init
-3. library.setReader
-4. library.onPreviewFrame
-5. library.release
-
-> app中没有增加动态申请权限，运行时请到设置手动给予权限。
 
 ### 方法介绍
 

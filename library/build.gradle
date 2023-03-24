@@ -1,15 +1,14 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    namespace 'com.tencent.qbar'
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0.1"
+        minSdk libs.versions.minSdk.get().toInteger()
+        targetSdk libs.versions.compileSdk.get().toInteger()
 
         consumerProguardFiles 'consumer-rules.pro'
     }
@@ -25,13 +24,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation libs.androidx.core
 
-    implementation 'com.github.sollyu:kotlin-extension-android:1.0.1'
-}
-
-repositories {
-    maven { url 'https://jitpack.io' }
+    // kotlin
+    implementation libs.kotlin.extension
 }
 

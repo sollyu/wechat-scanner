@@ -1,0 +1,32 @@
+[versions]
+compileSdk = '33'
+minSdk     = '24'
+camera     = '1.2.1'
+
+[libraries]
+#
+# androidx & kotlin
+#
+androidx-core       = 'androidx.core:core-ktx:1.8.0'
+androidx-appcompat  = 'androidx.appcompat:appcompat:1.5.1'
+androidx-material   = 'com.google.android.material:material:1.5.0'
+androidx-refresh    = 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+kotlin-coroutines   = 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
+kotlin-extension    = 'com.github.uhsk:kotlin-android-extension:1.0.11'
+
+#
+# camera
+#
+camera-core         =  { module = 'androidx.camera:camera-core'      , version.ref = 'camera' }
+camera-camera2      =  { module = 'androidx.camera:camera-camera2'   , version.ref = 'camera' }
+camera-lifecycle    =  { module = 'androidx.camera:camera-lifecycle' , version.ref = 'camera' }
+camera-view         =  { module = 'androidx.camera:camera-view'      , version.ref = 'camera' }
+camera-extensions   =  { module = 'androidx.camera:camera-extensions', version.ref = 'camera' }
+
+#
+# commons
+#
+common-guava    = 'com.google.guava:guava:30.1.1-android'                       # https://github.com/google/guava
+
+[bundles]
+camera   = ['camera-core', 'camera-camera2', 'camera-lifecycle', 'camera-view', 'camera-extensions']

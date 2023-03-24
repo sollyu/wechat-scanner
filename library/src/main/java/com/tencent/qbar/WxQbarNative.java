@@ -1,59 +1,76 @@
 package com.tencent.qbar;
 
+import android.graphics.Bitmap;
+import com.tencent.qbar.QbarNative;
+
+/* loaded from: classes10.dex */
 public class WxQbarNative {
+
+    /* loaded from: classes10.dex */
     public static class QBarReportMsg {
-        public String  binaryMethod;
-        public String  charsetMode;
-        public float   decodeScale;
-        public int     detectTime;
-        public String  ecLevel;
+        public String binaryMethod;
+        public String charsetMode;
+        public float decodeScale;
+        public int decodeTime;
+        public int detectTime;
+        public String ecLevel;
         public boolean inBlackList;
         public boolean inWhiteList;
-        public int     pyramidLv;
-        public int     qrcodeVersion;
-        public String  scaleList;
-        public int     srTime;
+        public int pyramidLv;
+        public int qrcodeVersion;
+        public String scaleList;
+        public int srTime;
     }
 
-    protected static native int FocusInit(int i, int i2, boolean z, int i3, int i4);
+    public static native int EncodeCustom(byte[] bArr, int[] iArr, String str, int i15, int i16, String str2, int i17, int i18, boolean z14, Bitmap bitmap, Bitmap bitmap2, Bitmap bitmap3, Bitmap bitmap4, Bitmap bitmap5, Bitmap bitmap6);
 
-    protected static native boolean FocusPro(byte[] bArr, boolean z, boolean[] zArr);
+    public static native int FocusInit(int i15, int i16, boolean z14, int i17, int i18);
 
-    protected static native int FocusRelease();
+    public static native boolean FocusPro(byte[] bArr, boolean z14, boolean[] zArr);
 
-    protected static native int QIPUtilYUVCrop(byte[] bArr, byte[] bArr2, int i, int i2, int i3, int i4, int i5, int i6);
+    public static native int FocusRelease();
 
-    protected static native int focusedEngineForBankcardInit(int i, int i2, int i3, boolean z);
+    public static native int GetDominantColors(Bitmap bitmap, int[] iArr);
 
-    protected static native int focusedEngineGetVersion();
+    public static native int QIPUtilYUVCrop(byte[] bArr, byte[] bArr2, int i15, int i16, int i17, int i18, int i19, int i24);
 
-    protected static native int focusedEngineProcess(byte[] bArr);
+    public static native int TestGenQRCode(Bitmap bitmap, Bitmap bitmap2, Bitmap bitmap3, Bitmap bitmap4, Bitmap bitmap5, Bitmap bitmap6, Bitmap bitmap7);
 
-    protected static native int focusedEngineRelease();
+    public static native int focusedEngineForBankcardInit(int i15, int i16, int i17, boolean z14);
 
-    protected static native int AddBlackInternal(int i, int i2);
+    public static native int focusedEngineGetVersion();
 
-    protected static native int AddBlackList(String str, int i);
+    public static native int focusedEngineProcess(byte[] bArr);
 
-    protected static native int AddWhiteList(String str, int i);
+    public static native int focusedEngineRelease();
 
-    /**
-     * 获取扫描结果
-     *
-     * @param qBarResultJNIArr 返回的数组
-     * @param qBarPointArr     返回的数组
-     * @param qBarReportMsgArr 返回的数组
-     * @param i                qBarId
-     * @return 被扫描出的数量
-     * @see QbarNative#ScanImage(byte[], int, int, int)
-     */
-    protected static native int GetDetailResults(QbarNative.QBarResultJNI[] qBarResultJNIArr, QbarNative.QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i);
+    public native int AddBlackInternal(int i15, int i16);
 
-    protected static native int GetDetectInfoByFrames(QbarNative.QBarCodeDetectInfo qBarCodeDetectInfo, QbarNative.QBarPoint qBarPoint, int i);
+    public native int AddBlackList(String str, int i15);
 
-    protected static native int GetOneResultReport(byte[] bArr, byte[] bArr2, byte[] bArr3, byte[] bArr4, int[] iArr, int[] iArr2, int i);
+    public native int AddWhiteList(String str, int i15);
 
-    protected static native int GetZoomInfo(QbarNative.QBarZoomInfo qBarZoomInfo, int i);
+    public native String GetCallSnapshot(int i15);
 
-    protected static native int SetCenterCoordinate(int i, int i2, int i3, int i4, int i5);
+    public native String GetDebugString(int i15);
+
+    public native int GetDetailResults(QbarNative.QBarResultJNI[] qBarResultJNIArr, QbarNative.QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i15);
+
+    public native int GetDetailResultsNew(QbarNative.QBarResultJNI[] qBarResultJNIArr, QbarNative.QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i15);
+
+    public native int GetDetectInfoByFrames(QbarNative.QBarCodeDetectInfo qBarCodeDetectInfo, QbarNative.QBarPoint qBarPoint, int i15);
+
+    public native int GetOneResultReport(byte[] bArr, byte[] bArr2, byte[] bArr3, byte[] bArr4, int[] iArr, int[] iArr2, int i15);
+
+    public native int GetZoomInfo(QbarNative.QBarZoomInfo qBarZoomInfo, int i15);
+
+    public native void Reset(int i15, boolean z14);
+
+    public native int ScanImage712(byte[] bArr, int i15, int i16, int i17, boolean z14);
+
+    public native int SetCenterCoordinate(int i15, int i16, int i17, int i18, int i19);
+
+    public native int SetScanTryHarder(int i15, int i16, int i17, float f15);
+
+    public native int SetTouchCoordinate(int i15, float f15, float f16);
 }

@@ -3,9 +3,9 @@ package com.tencent.qbar
 import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
-import cn.maizz.kotlin.extension.java.io.copy
-import cn.maizz.kotlin.extension.java.io.notExists
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.IOException
 
 /**
@@ -33,13 +33,13 @@ class WechatScanner {
     @Throws(IOException::class)
     fun releaseAssert(context: Context, folder: String = "qbar") {
         val outputFolder = File(context.filesDir, folder)
-        if (outputFolder.notExists()) {
+        if (outputFolder.exists().not()) {
             outputFolder.mkdirs()
         }
-        context.assets.open("qbar/detect_model.bin").copy(File(outputFolder, "detect_model.bin"))
-        context.assets.open("qbar/detect_model.param").copy(File(outputFolder, "detect_model.param"))
-        context.assets.open("qbar/srnet.bin").copy(File(outputFolder, "srnet.bin"))
-        context.assets.open("qbar/srnet.param").copy(File(outputFolder, "srnet.param"))
+        context.assets.open("qbar/stable/qbar_detect.xnet").copyTo(FileOutputStream(File(outputFolder, "detect_model.bin")))
+        context.assets.open("qbar/stable/qbar_sr.xnet").copyTo(FileOutputStream(File(outputFolder, "detect_model.param")))
+        context.assets.open("qbar/srnet.bin").copyTo(FileOutputStream(File(outputFolder, "srnet.bin")))
+        context.assets.open("qbar/srnet.param").copyTo(FileOutputStream(File(outputFolder, "srnet.param")))
     }
 
 
@@ -80,18 +80,22 @@ class WechatScanner {
         val superResolutionModelBinPath = File(folder, "srnet.bin")
         val superResolutionModelParamPath = File(folder, "srnet.param")
 
-        if (detectModelBinPathFile.notExists()) throw IOException()
-        if (detectModelParamPath.notExists()) throw IOException()
-        if (superResolutionModelBinPath.notExists()) throw IOException()
-        if (superResolutionModelParamPath.notExists()) throw IOException()
+        if (detectModelBinPathFile.exists().not()) throw FileNotFoundException("$detectModelBinPathFile")
+        if (detectModelParamPath.exists().not()) throw FileNotFoundException("$detectModelParamPath")
+        if (superResolutionModelBinPath.exists().not()) throw FileNotFoundException("$superResolutionModelBinPath")
+        if (superResolutionModelParamPath.exists().not()) throw FileNotFoundException("$superResolutionModelParamPath")
 
         val qbarAiModelParam: QbarNative.QbarAiModelParam = QbarNative.QbarAiModelParam()
         qbarAiModelParam.detect_model_bin_path_ = detectModelBinPathFile.absolutePath
         qbarAiModelParam.detect_model_param_path_ = detectModelParamPath.absolutePath
         qbarAiModelParam.superresolution_model_bin_path_ = superResolutionModelBinPath.absolutePath
         qbarAiModelParam.superresolution_model_param_path_ = superResolutionModelParamPath.absolutePath
+        qbarAiModelParam.detectModelVersion = "V1.0.0.26" //  "V1.1.0.26" : "V1.0.0.26";
+        qbarAiModelParam.superResolutionModelVersion = "V1.0.0.26"
+        qbarAiModelParam.enable_seg = false
+        qbarAiModelParam.qbar_segmentation_model_path_ = ""
 
-        id = QbarNative.Init(1, 0, "ANY", "UTF-8", qbarAiModelParam)
+        id = QbarNative.Init(1, false, false, true, false, 1,0, "ANY", "UTF-8", qbarAiModelParam)
         return id
     }
 
@@ -136,10 +140,13 @@ class WechatScanner {
         if (scanImageResult != 0) throw RuntimeException("Native.ScanImage error: $scanImageResult")
 
         val qBarResultJNIArr: Array<QbarNative.QBarResultJNI> = arrayOf(QbarNative.QBarResultJNI(), QbarNative.QBarResultJNI(), QbarNative.QBarResultJNI())
-        val qBarPointArr: Array<QbarNative.QBarPoint> = arrayOf(QbarNative.QBarPoint(), QbarNative.QBarPoint(), QbarNative.QBarPoint())
-        val qBarReportMsgArr: Array<WxQbarNative.QBarReportMsg> = arrayOf(WxQbarNative.QBarReportMsg(), WxQbarNative.QBarReportMsg(), WxQbarNative.QBarReportMsg())
+        for (qBarResultJNI in qBarResultJNIArr) {
+            qBarResultJNI.typeName = ""
+            qBarResultJNI.charset = ""
+            qBarResultJNI.data = ByteArray(1024)
+        }
 
-        val getDetailResults: Int = WxQbarNative.GetDetailResults(qBarResultJNIArr, qBarPointArr, qBarReportMsgArr, qBarId)
+        val getDetailResults: Int = QbarNative.GetResults(qBarResultJNIArr, qBarId)
         if (getDetailResults < 0) throw RuntimeException("Native.GetDetailResults error: $getDetailResults")
 
         return qBarResultJNIArr.filter { qBarResultJNI: QbarNative.QBarResultJNI? -> qBarResultJNI?.typeName?.isNotEmpty() == true }

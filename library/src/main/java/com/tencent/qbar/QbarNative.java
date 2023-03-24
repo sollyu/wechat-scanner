@@ -22,15 +22,24 @@ public class QbarNative {
         public float y3;
     }
 
+    public static class QBarReportMsg {
+        public int qrcodeVersion;
+    }
+
     /**
      * 扫一扫模块初始化参数
      * 参数暂时不明确含义
      */
     public static class QbarAiModelParam {
-        public String detect_model_bin_path_;
-        public String detect_model_param_path_;
-        public String superresolution_model_bin_path_;
-        public String superresolution_model_param_path_;
+        public String  detectModelVersion;
+        public String  detect_model_bin_path_;
+        public String  detect_model_param_path_;
+        public boolean enable_seg = false;
+        public String  qbar_segmentation_model_path_;
+        public String  superResolutionModelVersion;
+        public String  superresolution_model_bin_path_;
+        public String  superresolution_model_param_path_;
+
     }
 
     /**
@@ -122,14 +131,22 @@ public class QbarNative {
 
     protected native int GetOneResult(byte[] bArr, byte[] bArr2, byte[] bArr3, int[] iArr, int i);
 
-    protected static native int GetResults(QBarResultJNI[] qBarResultJNIArr, int i);
+    /**
+     * 获取扫一扫结果
+     *
+     * @param qBarResultJNIArr 扫一扫结果数组
+     * @param qbarId           初始化ID
+     * @return 非0失败
+     */
+    protected static native int GetResults(QBarResultJNI[] qBarResultJNIArr, int qbarId);
 
     protected native int GetZoomInfo(QBarZoomInfo qBarZoomInfo, int i);
 
     /**
      * 初始化扫一扫模块
      *
-     * @param unknown1         未知字段，固定值：1
+     * @param qbarBackend      固定值：1
+     * @param qBarOptSr        默认值：false
      * @param unknown2         未知字段，0相机扫描 1图片扫描
      * @param type             扫描类型：ANY
      * @param charset          扫描的字符集：UTF-8
@@ -137,7 +154,20 @@ public class QbarNative {
      * @return 初始化ID，后续好多API都需要：qBarId
      * @see QbarAiModelParam
      */
-    protected static native int Init(int unknown1, int unknown2, String type, String charset, QbarAiModelParam qbarAiModelParam);
+    //protected static native int Init(int unknown1, int unknown2, String type, String charset, QbarAiModelParam qbarAiModelParam);
+    protected static native int Init(
+            int qbarBackend,
+            boolean qBarOptSr,      // 默认值：false
+            boolean qBarOptDet,     // 默认值：false
+            boolean qBarOptForceDM, // 默认值：true
+            boolean qBarOptLibdmtx, // 默认值：false
+            int i16,                // 固定值：1
+            int unknown2,           // 外部参数
+            String type,            // 固定值：ANY
+            String charset,         // 固定值：UTF-8
+            QbarAiModelParam qbarAiModelParam
+    );
+
 
     /**
      * 释放一个已经初始化对对象
@@ -160,6 +190,18 @@ public class QbarNative {
      * @see WxQbarNative#GetDetailResults(QBarResultJNI[], QBarPoint[], WxQbarNative.QBarReportMsg[], int)
      */
     protected static native int ScanImage(byte[] onPreviewFrameDataGray, int onPreviewFrameDataGrayWeight, int onPreviewFrameDataGrayHeight, int qBarId);
+
+    /**
+     * 获取扫描结果
+     *
+     * @param qBarResultJNIArr 返回的数组
+     * @param qBarPointArr     返回的数组
+     * @param qBarReportMsgArr 返回的数组
+     * @param i                qBarId
+     * @return 被扫描出的数量
+     * @see QbarNative#ScanImage(byte[], int, int, int)
+     */
+    protected static native int GetDetailResults(QBarResultJNI[] qBarResultJNIArr, QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i);
 
     /**
      * 设置一个扫描器

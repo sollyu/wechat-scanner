@@ -6,11 +6,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <SurfaceView
-        android:id="@+id/surfaceView"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/iv_camera"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@android:color/transparent"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,12 +29,6 @@
             android:layout_height="wrap_content"
             android:onClick="onClickOpen"
             android:text="打开相机" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClickFouce"
-            android:text="自动聚焦" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/textView"

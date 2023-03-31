@@ -3,13 +3,18 @@ package com.tencent.qbar;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class QbarNative {
 
+    @Keep
     public static class QBarCodeDetectInfo {
         public float prob;
         public int   readerId;
     }
 
+    @Keep
     public static class QBarPoint {
         public int   point_cnt;
         public float x0;
@@ -22,6 +27,7 @@ public class QbarNative {
         public float y3;
     }
 
+    @Keep
     public static class QBarReportMsg {
         public int qrcodeVersion;
     }
@@ -30,6 +36,7 @@ public class QbarNative {
      * 扫一扫模块初始化参数
      * 参数暂时不明确含义
      */
+    @Keep
     public static class QbarAiModelParam {
         public String  detectModelVersion;
         public String  detect_model_bin_path_;
@@ -45,6 +52,7 @@ public class QbarNative {
     /**
      * 扫一扫返回数组
      */
+    @Keep
     public static class QBarResultJNI {
 
         /**
@@ -75,25 +83,26 @@ public class QbarNative {
         public String typeName;
     }
 
+    @Keep
     public static class QBarZoomInfo {
         public boolean isZoom;
         public float   zoomFactor;
     }
 
-    protected static native int Encode(byte[] bArr, int[] iArr, String str, int i, int i2, String str2, int i3);
+    public static native int Encode(byte[] bArr, int[] iArr, String str, int i, int i2, String str2, int i3);
 
-    protected static native int EncodeBitmap(String str, Bitmap bitmap, int i, int i2, int i3, int i4, String str2, int i5);
+    public static native int EncodeBitmap(String str, Bitmap bitmap, int i, int i2, int i3, int i4, String str2, int i5);
 
     /**
      * 获取当前版本号
      *
      * @return 版本：3.2.20190712
      */
-    protected static native String GetVersion();
+    public static native String GetVersion();
 
-    protected static native int nativeArrayConvert(int i, int i2, byte[] bArr, int[] iArr);
+    public static native int nativeArrayConvert(int i, int i2, byte[] bArr, int[] iArr);
 
-    protected static native int nativeCropGray2(byte[] bArr, byte[] bArr2, int i, int i2, int i3);
+    public static native int nativeCropGray2(byte[] bArr, byte[] bArr2, int i, int i2, int i3);
 
     /**
      * 对 onPreviewFrame 输出对数据进行 灰度、旋转、裁剪 一条龙服务
@@ -115,21 +124,21 @@ public class QbarNative {
      * @return 非0失败
      * @see android.hardware.Camera.PreviewCallback#onPreviewFrame(byte[], Camera)
      */
-    protected static native int nativeGrayRotateCropSub(byte[] onPreviewFrameData, int onPreviewFrameDataWeight, int onPreviewFrameDataHeight, int cropLeft, int cropTop, int cropWidth, int cropHeight, byte[] outputData, int[] outputDataWH, int rotation, int unknown);
+    public static native int nativeGrayRotateCropSub(byte[] onPreviewFrameData, int onPreviewFrameDataWeight, int onPreviewFrameDataHeight, int cropLeft, int cropTop, int cropWidth, int cropHeight, byte[] outputData, int[] outputDataWH, int rotation, int unknown);
 
-    protected static native int nativeTransBytes(int[] prepareGrayData, byte[] outputData, int sizeX, int sizeY);
+    public static native int nativeTransBytes(int[] prepareGrayData, byte[] outputData, int sizeX, int sizeY);
 
-    protected static native int nativeTransPixels(int[] iArr, byte[] bArr, int i, int i2);
+    public static native int nativeTransPixels(int[] iArr, byte[] bArr, int i, int i2);
 
-    protected static native int nativeYUVrotate(byte[] bArr, byte[] bArr2, int i, int i2);
+    public static native int nativeYUVrotate(byte[] bArr, byte[] bArr2, int i, int i2);
 
-    protected static native int nativeYUVrotateLess(byte[] bArr, int i, int i2);
+    public static native int nativeYUVrotateLess(byte[] bArr, int i, int i2);
 
-    protected static native int nativeYuvToCropIntArray(byte[] bArr, int[] iArr, int i, int i2, int i3, int i4, int i5, int i6);
+    public static native int nativeYuvToCropIntArray(byte[] bArr, int[] iArr, int i, int i2, int i3, int i4, int i5, int i6);
 
-    protected native int GetCodeDetectInfo(QBarCodeDetectInfo[] qBarCodeDetectInfoArr, QBarPoint[] qBarPointArr, int i);
+    public native int GetCodeDetectInfo(QBarCodeDetectInfo[] qBarCodeDetectInfoArr, QBarPoint[] qBarPointArr, int i);
 
-    protected native int GetOneResult(byte[] bArr, byte[] bArr2, byte[] bArr3, int[] iArr, int i);
+    public native int GetOneResult(byte[] bArr, byte[] bArr2, byte[] bArr3, int[] iArr, int i);
 
     /**
      * 获取扫一扫结果
@@ -138,9 +147,9 @@ public class QbarNative {
      * @param qbarId           初始化ID
      * @return 非0失败
      */
-    protected static native int GetResults(QBarResultJNI[] qBarResultJNIArr, int qbarId);
+    public static native int GetResults(QBarResultJNI[] qBarResultJNIArr, int qbarId);
 
-    protected native int GetZoomInfo(QBarZoomInfo qBarZoomInfo, int i);
+    public native int GetZoomInfo(QBarZoomInfo qBarZoomInfo, int i);
 
     /**
      * 初始化扫一扫模块
@@ -154,8 +163,8 @@ public class QbarNative {
      * @return 初始化ID，后续好多API都需要：qBarId
      * @see QbarAiModelParam
      */
-    //protected static native int Init(int unknown1, int unknown2, String type, String charset, QbarAiModelParam qbarAiModelParam);
-    protected static native int Init(
+    //public static native int Init(int unknown1, int unknown2, String type, String charset, QbarAiModelParam qbarAiModelParam);
+    public static native int Init(
             int qbarBackend,
             boolean qBarOptSr,      // 默认值：false
             boolean qBarOptDet,     // 默认值：false
@@ -174,9 +183,9 @@ public class QbarNative {
      *
      * @param qBarId id
      * @return 非0失败
-     * @see QbarNative#Init(int, int, String, String, QbarAiModelParam)
+     * @see QbarNative#Init
      */
-    protected static native int Release(int qBarId);
+    public static native int Release(int qBarId);
 
     /**
      * 扫描一张图片，数据需要是灰度
@@ -189,7 +198,7 @@ public class QbarNative {
      * @see QbarNative#nativeGrayRotateCropSub(byte[], int, int, int, int, int, int, byte[], int[], int, int)
      * @see WxQbarNative#GetDetailResults(QBarResultJNI[], QBarPoint[], WxQbarNative.QBarReportMsg[], int)
      */
-    protected static native int ScanImage(byte[] onPreviewFrameDataGray, int onPreviewFrameDataGrayWeight, int onPreviewFrameDataGrayHeight, int qBarId);
+    public static native int ScanImage(byte[] onPreviewFrameDataGray, int onPreviewFrameDataGrayWeight, int onPreviewFrameDataGrayHeight, int qBarId);
 
     /**
      * 获取扫描结果
@@ -201,7 +210,7 @@ public class QbarNative {
      * @return 被扫描出的数量
      * @see QbarNative#ScanImage(byte[], int, int, int)
      */
-    protected static native int GetDetailResults(QBarResultJNI[] qBarResultJNIArr, QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i);
+    public static native int GetDetailResults(QBarResultJNI[] qBarResultJNIArr, QBarPoint[] qBarPointArr, QBarReportMsg[] qBarReportMsgArr, int i);
 
     /**
      * 设置一个扫描器
@@ -212,7 +221,7 @@ public class QbarNative {
      * @param scanModeSize 扫描模式的大小
      * @param qBarId       被初始化的ID
      * @return 非0失败
-     * @see QbarNative#Init(int, int, String, String, QbarAiModelParam)
+     * @see QbarNative#Init
      */
-    protected static native int SetReaders(int[] scanMode, int scanModeSize, int qBarId);
+    public static native int SetReaders(int[] scanMode, int scanModeSize, int qBarId);
 }

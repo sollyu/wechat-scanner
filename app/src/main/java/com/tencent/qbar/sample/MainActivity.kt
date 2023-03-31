@@ -1,34 +1,48 @@
 package com.tencent.qbar.sample
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Point
-import android.graphics.Rect
-import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
-import android.view.SurfaceHolder
+import android.view.Surface
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
+import androidx.camera.extensions.ExtensionMode
+import androidx.camera.extensions.ExtensionsManager
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
 import com.google.common.base.Stopwatch
-import com.tencent.qbar.QbarNative
-import com.tencent.qbar.WechatScanner
+import com.tencent.qbar.WechatScannerDelegate
 import com.tencent.qbar.sample.databinding.ActivityMainBinding
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.nio.charset.Charset
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress(names = ["DEPRECATION"])
-class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback, Camera.AutoFocusCallback {
-
-    companion object {
-        const val TAG = "WeChatScanner"
-    }
+class MainActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
 
     private lateinit var viewBinding: ActivityMainBinding
 
-    private lateinit var wechatScanner: WechatScanner
-    private lateinit var camera: Camera
+    private var mCamera: androidx.camera.core.Camera? = null
 
-    private var isScanFinish: Boolean = false
+    private val mIsEnabledOnCameraImageAnalyze = AtomicBoolean(true)
+    private val mWechatScannerDelegate: WechatScannerDelegate = WechatScannerDelegate()
+    private val mImageAnalysis: ImageAnalysis = ImageAnalysis.Builder()
+        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+        .setOutputImageRotationEnabled(true)
+        .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+        .build()
+    private val mPreview: Preview = Preview.Builder()
+        .setTargetRotation(Surface.ROTATION_0)
+        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,76 +51,65 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.Preview
     }
 
     fun onClickInit(view: View) {
-        wechatScanner = WechatScanner()
-        wechatScanner.releaseAssert(view.context)
-        val code: Int = wechatScanner.init(view.context) ?: -1
-        wechatScanner.setReader()
-        viewBinding.textView.text = wechatScanner.version()
-        Log.d(TAG, "LOG:MainActivity:onClickInit: code=$code")
+        mWechatScannerDelegate.init(context = this)
+        viewBinding.textView.text = mWechatScannerDelegate.version
     }
 
     fun onClickOpen(view: View) {
-        viewBinding.surfaceView.holder.addCallback(this)
+        val context: Context = view.context
 
-        camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
-        camera.setPreviewDisplay(viewBinding.surfaceView.holder)
-        camera.setDisplayOrientation(90)
-
-        val parameters: Camera.Parameters = camera.parameters
-        parameters.focusMode = Camera.Parameters.FLASH_MODE_AUTO
-
-        camera.parameters = parameters
-        camera.setPreviewCallback(this)
-        camera.startPreview()
-    }
-
-    fun onClickFouce(view: View) {
-        camera.autoFocus(this)
-    }
-
-    fun onClickReset(view: View) {
-        isScanFinish = false
-        viewBinding.textView.text = ""
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {
-    }
-
-    override fun onPreviewFrame(data: ByteArray, camera: Camera) {
-        if (isScanFinish)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), 1)
             return
+        }
 
-        val stopwatch: Stopwatch = Stopwatch.createStarted()
-        val scanResultList: List<QbarNative.QBarResultJNI> = wechatScanner.onPreviewFrame(
-            data = data,
-            size = Point(camera.parameters.previewSize.width, camera.parameters.previewSize.height),
-            crop = Rect(0, 0, camera.parameters.previewSize.width, camera.parameters.previewSize.height),
-            rotation = 90
-        )
-        if (scanResultList.isNotEmpty()) {
-            isScanFinish = true
-            scanResultList.forEach { qBarResultJNI: QbarNative.QBarResultJNI ->
-                Log.d(TAG, "LOG:MainActivity:onPreviewFrame typeName=" + qBarResultJNI.typeName + " charset=" + qBarResultJNI.charset + " data=" + String(qBarResultJNI.data, Charset.forName(qBarResultJNI.charset)))
-            }
-            viewBinding.textView.post { viewBinding.textView.text = scanResultList.first().let { String(it.data, Charset.forName(it.charset)) } }
-            Log.d(TAG, "LOG:MainActivity:onPreviewFrame scan cost: $stopwatch")
+        // 获取相机提供者
+        val cameraProvider: ProcessCameraProvider = ProcessCameraProvider.getInstance(context).get()
+        val extensionsManager: ExtensionsManager = ExtensionsManager.getInstanceAsync(context, cameraProvider).get()
+
+        // 获取相机设备来检查是否支持扩展
+        val cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+        // 预览参数
+        mPreview.setSurfaceProvider(viewBinding.ivCamera.surfaceProvider)
+        mImageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), this)
+
+        // 检查是否支持 AUTO
+        mCamera = if (extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO)) {
+            val bokehCameraSelector: CameraSelector = extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, ExtensionMode.AUTO)
+            cameraProvider.bindToLifecycle(this, bokehCameraSelector, mImageAnalysis, mPreview)
+        } else {
+            cameraProvider.bindToLifecycle(this, cameraSelector, mPreview, mImageAnalysis)
         }
     }
 
-    override fun onAutoFocus(success: Boolean, camera: Camera?) {
-        Log.d(TAG, "LOG:MainActivity:onAutoFocus success=${success}")
+    fun onClickReset(view: View) {
+        mIsEnabledOnCameraImageAnalyze.set(true)
+        viewBinding.textView.text = ""
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        camera.release()
-        wechatScanner.release()
+        mWechatScannerDelegate.release()
+    }
+
+    override fun analyze(image: ImageProxy) {
+        image.use { img ->
+            if (mIsEnabledOnCameraImageAnalyze.get().not()) {
+                return@use
+            }
+            val stopwatch: Stopwatch = Stopwatch.createStarted()
+            val data: ByteArray = img.toFormatToNv21()
+            val scanResultList: List<String> = mWechatScannerDelegate.scan(data = data, size = Point(img.width, img.height), rotation = 90)
+            if (scanResultList.isEmpty()) {
+                return
+            }
+            mIsEnabledOnCameraImageAnalyze.set(false)
+            runOnUiThread { viewBinding.textView.text = scanResultList[0] }
+            for (qbar: String in scanResultList) {
+                Log.d("MainActivity", " scan cost:$stopwatch text:$qbar")
+            }
+        }
     }
 
 }

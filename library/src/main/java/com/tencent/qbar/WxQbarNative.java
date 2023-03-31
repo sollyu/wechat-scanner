@@ -1,12 +1,14 @@
 package com.tencent.qbar;
 
 import android.graphics.Bitmap;
+
+import androidx.annotation.Keep;
+
 import com.tencent.qbar.QbarNative;
 
-/* loaded from: classes10.dex */
+@Keep
 public class WxQbarNative {
 
-    /* loaded from: classes10.dex */
     public static class QBarReportMsg {
         public String binaryMethod;
         public String charsetMode;

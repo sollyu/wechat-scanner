@@ -44,6 +44,9 @@ dependencies {
     // commons
     implementation libs.common.guava
 
+    // bundles
+    implementation libs.bundles.camera
+
     // 本地引用不需要手动复制so文件
     implementation project(path: ':library')
 

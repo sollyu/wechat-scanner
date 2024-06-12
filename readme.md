@@ -8,7 +8,7 @@
 
 ## 说明
 
-反汇编 [微信7.0.8.1540](https://www.wandoujia.com/apps/596157/history_v1540) 版本，提取扫一扫功能模块。
+反汇编 [微信8.0.33](https://www.wandoujia.com/apps/596157/history_v2320) 版本，提取扫一扫功能模块。
 
 如若没有重大变动，本工程基本不会更新，但会持续关注。
 
@@ -54,7 +54,7 @@ repositories {
 }
 // 引入本项目的包文件
 dependencies {
-	implementation "com.github.sollyu:wechat-scanner:1.1.1"
+	implementation "com.github.sollyu:wechat-scanner:1.1.3"
 }
 ```
 
